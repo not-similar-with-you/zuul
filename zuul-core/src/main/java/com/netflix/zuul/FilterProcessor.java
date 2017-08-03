@@ -45,7 +45,7 @@ import static org.mockito.Mockito.*;
  *         Time: 12:47 PM
  */
 public class FilterProcessor {
-
+    // 单例
     static FilterProcessor INSTANCE = new FilterProcessor();
     protected static final Logger logger = LoggerFactory.getLogger(FilterProcessor.class);
 

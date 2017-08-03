@@ -69,7 +69,7 @@ public class ZuulServlet extends HttpServlet {
             // explicitly bound in web.xml, for which requests will not have the same data attached
             RequestContext context = RequestContext.getCurrentContext();
             context.setZuulEngineRan();
-
+            //前置过滤器 报错，执行error post 过滤器
             try {
                 preRoute();
             } catch (ZuulException e) {
@@ -77,6 +77,7 @@ public class ZuulServlet extends HttpServlet {
                 postRoute();
                 return;
             }
+            //route过滤器 报错，执行error post 过滤器
             try {
                 route();
             } catch (ZuulException e) {
@@ -84,6 +85,7 @@ public class ZuulServlet extends HttpServlet {
                 postRoute();
                 return;
             }
+            //post过滤器 报错，执行error 过滤器
             try {
                 postRoute();
             } catch (ZuulException e) {
@@ -92,6 +94,7 @@ public class ZuulServlet extends HttpServlet {
             }
 
         } catch (Throwable e) {
+            // error 过滤器 获取抛错的类名，未捕获异常 zuulException
             error(new ZuulException(e, 500, "UNHANDLED_EXCEPTION_" + e.getClass().getName()));
         } finally {
             RequestContext.getCurrentContext().unset();
