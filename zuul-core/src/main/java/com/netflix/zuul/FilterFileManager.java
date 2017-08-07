@@ -145,6 +145,7 @@ public class FilterFileManager {
      */
     List<File> getFiles() {
         List<File> list = new ArrayList<File>();
+        //aDirectories [] = { preFiltersPath,postFiltersPath,routingFiltersPath} or + customPath
         for (String sDirectory : aDirectories) {
             if (sDirectory != null) {
                 File directory = getDirectory(sDirectory);

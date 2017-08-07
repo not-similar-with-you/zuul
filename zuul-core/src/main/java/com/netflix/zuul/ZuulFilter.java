@@ -110,10 +110,12 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
     public ZuulFilterResult runFilter() {
         ZuulFilterResult zr = new ZuulFilterResult();
         if (!isFilterDisabled()) {
-            if (shouldFilter()) {
+            if (shouldFilter()) {// shouldFilter 是否 返回 true
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
+                    // 运行获取 结果
                     Object res = run();
+                    // 封装 成 ZuulFilterResult
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);
                 } catch (Throwable e) {
                     t.setName("ZUUL::" + this.getClass().getSimpleName() + " failed");
@@ -123,6 +125,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
                     t.stopAndLog();
                 }
             } else {
+                // 封装 成 ZuulFilterResult 跳过 当前filter
                 zr = new ZuulFilterResult(ExecutionStatus.SKIPPED);
             }
         }

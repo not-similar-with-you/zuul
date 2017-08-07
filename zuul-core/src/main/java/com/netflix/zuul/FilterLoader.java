@@ -144,6 +144,7 @@ public class FilterLoader {
      * @throws IOException
      */
     public boolean putFilter(File file) throws Exception {
+        // 绝对路径+ 文件名
         String sName = file.getAbsolutePath() + file.getName();
         if (filterClassLastModified.get(sName) != null && (file.lastModified() != filterClassLastModified.get(sName))) {
             LOG.debug("reloading filter " + sName);
@@ -153,11 +154,13 @@ public class FilterLoader {
         if (filter == null) {
             Class clazz = COMPILER.compile(file);
             if (!Modifier.isAbstract(clazz.getModifiers())) {
+                // 反射 创建 filter 对象
                 filter = (ZuulFilter) FILTER_FACTORY.newInstance(clazz);
                 List<ZuulFilter> list = hashFiltersByType.get(filter.filterType());
-                if (list != null) {
+                if (list != null) {// 重建 map
                     hashFiltersByType.remove(filter.filterType()); //rebuild this list
                 }
+                // 放入 filter 信息
                 filterRegistry.put(file.getAbsolutePath() + file.getName(), filter);
                 filterClassLastModified.put(sName, file.lastModified());
                 return true;
@@ -174,21 +177,22 @@ public class FilterLoader {
      * @return a List<ZuulFilter>
      */
     public List<ZuulFilter> getFiltersByType(String filterType) {
-
+        // get currentHashMap 中 filterType 响应的list
         List<ZuulFilter> list = hashFiltersByType.get(filterType);
         if (list != null) return list;
 
         list = new ArrayList<ZuulFilter>();
-
+        // get 所有的 filter 集合
         Collection<ZuulFilter> filters = filterRegistry.getAllFilters();
         for (Iterator<ZuulFilter> iterator = filters.iterator(); iterator.hasNext(); ) {
             ZuulFilter filter = iterator.next();
+            // 不忽略大小写
             if (filter.filterType().equals(filterType)) {
                 list.add(filter);
             }
         }
         Collections.sort(list); // sort by priority
-
+        // 放入 currentHashMap 中
         hashFiltersByType.putIfAbsent(filterType, list);
         return list;
     }

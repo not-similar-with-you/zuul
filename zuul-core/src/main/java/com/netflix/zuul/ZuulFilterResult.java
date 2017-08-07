@@ -1,10 +1,14 @@
 package com.netflix.zuul;
 
-
+/**
+ * filter 执行结果封装类
+ */
 public final class ZuulFilterResult {
-        
+    // run() 返回对象
     private Object result;
+    // 异常信息
     private Throwable exception;
+
     private ExecutionStatus status;
     
     public ZuulFilterResult(Object result, ExecutionStatus status) {

@@ -150,11 +150,14 @@ public class FilterProcessor {
             Debug.addRoutingDebug("Invoking {" + sType + "} type filters");
         }
         boolean bResult = false;
+        // 获得 stype 类型 的 过滤器列表
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
                 ZuulFilter zuulFilter = list.get(i);
+                // 处理过滤器，获得返回结果
                 Object result = processZuulFilter(zuulFilter);
+                // 如果返回结果不为空 且 为 Boolean 类型
                 if (result != null && result instanceof Boolean) {
                     bResult |= ((Boolean) result);
                 }
@@ -171,14 +174,15 @@ public class FilterProcessor {
      * @throws ZuulException
      */
     public Object processZuulFilter(ZuulFilter filter) throws ZuulException {
-
+        // 获取 ConcurrentHashMap
         RequestContext ctx = RequestContext.getCurrentContext();
-        boolean bDebug = ctx.debugRouting();
+        boolean bDebug = ctx.debugRouting();// 获取 debugRouting 值
         final String metricPrefix = "zuul.filter-";
         long execTime = 0;
         String filterName = "";
         try {
             long ltime = System.currentTimeMillis();
+            // 获取filter 名称
             filterName = filter.getClass().getSimpleName();
             
             RequestContext copy = null;
@@ -189,17 +193,17 @@ public class FilterProcessor {
                 Debug.addRoutingDebug("Filter " + filter.filterType() + " " + filter.filterOrder() + " " + filterName);
                 copy = ctx.copy();
             }
-            
+            // 调用 子类 run 方法，获取结果状态
             ZuulFilterResult result = filter.runFilter();
             ExecutionStatus s = result.getStatus();
             execTime = System.currentTimeMillis() - ltime;
 
-            switch (s) {
+            switch (s) {//执行失败，增加总结
                 case FAILED:
                     t = result.getException();
                     ctx.addFilterExecutionSummary(filterName, ExecutionStatus.FAILED.name(), execTime);
                     break;
-                case SUCCESS:
+                case SUCCESS://执行成功
                     o = result.getResult();
                     ctx.addFilterExecutionSummary(filterName, ExecutionStatus.SUCCESS.name(), execTime);
                     if (bDebug) {
@@ -221,7 +225,7 @@ public class FilterProcessor {
                 Debug.addRoutingDebug("Running Filter failed " + filterName + " type:" + filter.filterType() + " order:" + filter.filterOrder() + " " + e.getMessage());
             }
             usageNotifier.notify(filter, ExecutionStatus.FAILED);
-            if (e instanceof ZuulException) {
+            if (e instanceof ZuulException) {// 是否为 ZuulException
                 throw (ZuulException) e;
             } else {
                 ZuulException ex = new ZuulException(e, "Filter threw Exception", 500, filter.filterType() + ":" + filterName);
